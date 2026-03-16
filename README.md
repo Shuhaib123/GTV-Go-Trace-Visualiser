@@ -92,6 +92,79 @@ flowchart LR
   - topology narration panel (`Compact` / `Normal` + copy)
 - Instrument flow supports loading generated workloads directly from `internal/workload`.
 
+## Setup and Dependencies
+
+### Prerequisites
+
+- **Go**: 1.21 or later
+- **Node.js**: 16 or later (for web UI development and testing)
+- **Git**: for cloning the repository
+- **Operating System**: Linux, macOS, or Windows (with Git Bash or WSL2 for Windows)
+
+### Installation
+
+#### 1. Clone the repository
+
+```bash
+git clone https://github.com/Shuhaib123/GTV-Go-Trace-Visualiser.git
+cd GTV-Go-Trace-Visualiser
+```
+
+#### 2. Verify Go installation
+
+```bash
+go version
+```
+
+Ensure the version is 1.21 or later.
+
+#### 3. Download Go dependencies
+
+```bash
+go mod download
+```
+
+This downloads all required Go modules specified in `go.mod`.
+
+#### 4. Verify Node.js installation (optional, required for UI development)
+
+```bash
+node --version
+npm --version
+```
+
+Ensure Node.js is 16 or later. If you only plan to run the server, this is optional.
+
+### Environment Variables (Optional)
+
+The project includes sensible defaults, but you can customize behavior with environment variables:
+
+```bash
+export GTV_ADDR=:8080              # Server listen address (default :8080)
+export GTV_MODE=teach              # Event mode: teach or debug (default teach)
+export GTV_TIMEOUT=30000           # Timeout in ms for workload execution
+```
+
+For a full list of available environment variables, see [Key Flags and Environment Variables](#key-flags-and-environment-variables).
+
+### Verification
+
+Verify your setup by running the live server:
+
+```bash
+go run ./cmd/gtv-live
+```
+
+You should see output indicating the server is running. Open your browser and navigate to:
+
+```
+http://localhost:8080/
+```
+
+If the page loads, your setup is complete!
+
+To stop the server, press `Ctrl+C` in your terminal.
+
 ## Quick Start
 
 ### Live (recommended)
