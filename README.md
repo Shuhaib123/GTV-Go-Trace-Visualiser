@@ -11,32 +11,45 @@ It includes an instrumenter, a shared trace processor, and two graph viewers wit
 
 ```mermaid
 flowchart LR
-  A[Go workload source] --> B[Instrumenter\n(optional but recommended)\ninternal/instrumenter]
-  B --> C[Run instrumented binary]
+  A["Go Workload Source"] --> B["Instrumentation (required)<br/>internal/instrumenter"]
+  A --> C["Run Go Binary"]
+  B --> C
 
-  C --> D[runtime/trace stream]
-  C --> E[trace.out file]
+  C --> D["runtime/trace live stream"]
+  C --> E["trace.out file"]
 
-  D --> F[Live parser\ncmd/gtv-live + internal/traceproc]
-  E --> G[Offline parser\ninternal/traceproc]
+  subgraph LIVE["Live Path (real-time)"]
+    direction LR
+    F["cmd/gtv-live<br/>x/exp/trace.Reader + internal/traceproc"]
+    H["/trace WebSocket<br/>incremental JSON events"]
+    K["Live Graph Viewer<br/>web/pages/graph-live"]
+    D --> F --> H --> K
+  end
 
-  F --> H[Normalized events/entities\n(JSON envelope over WebSocket)]
-  G --> I[trace.json\n(events + entities)]
+  subgraph OFF["Offline Path (post-run replay)"]
+    direction LR
+    G["main.go + parser.go<br/>uses internal/traceproc"]
+    I["trace.json<br/>events + entities + metadata"]
+    L["Offline Graph Viewer<br/>web/pages/graph"]
+    E --> G --> I --> L
+  end
 
-  H --> J[Topology Builder\nweb/shared/topology-builder.js]
+  J["Shared Topology Builder<br/>web/shared/topology-builder.js"]
   I --> J
+  H --> J
+  J --> K
+  J --> L
 
-  J --> K[Live Graph\nweb/pages/graph-live]
-  J --> L[Offline Graph\nweb/pages/graph]
+  M["Topology Narration<br/>formation-only summary"]
+  J -.-> M
 
-  J --> M[Topology Narration\nformation-only summary]
-
-  subgraph Semantics
-    N[create: goroutine -> channel/resource]
-    O[spawn: parent goroutine -> child goroutine]
-    P[channel layer: send/recv]
-    Q[sync layer: lock/unlock/wg/cond]
-    R[causal layer: optional overlay]
+  subgraph S["Graph Semantics"]
+    direction TB
+    N["spawn: parent goroutine -> child goroutine"]
+    O["create: goroutine -> channel/resource"]
+    P["channel layer: send/recv"]
+    Q["sync layer: lock/unlock/wg/cond"]
+    R["causal layer: optional overlay"]
   end
 
   J --- N
@@ -44,6 +57,28 @@ flowchart LR
   J --- P
   J --- Q
   J --- R
+
+  classDef source fill:#eef2ff,stroke:#4f46e5,color:#111827,stroke-width:1px;
+  classDef optional fill:#fb923c,stroke:#c2410c,color:#ffffff,stroke-width:1px;
+  classDef exec fill:#14b8a6,stroke:#0f766e,color:#ffffff,stroke-width:1px;
+  classDef stream fill:#dbeafe,stroke:#1d4ed8,color:#111827,stroke-width:1px;
+  classDef live fill:#dcfce7,stroke:#16a34a,color:#111827,stroke-width:1px;
+  classDef offline fill:#fef3c7,stroke:#d97706,color:#111827,stroke-width:1px;
+  classDef topology fill:#99f6e4,stroke:#0f766e,color:#111827,stroke-width:1px;
+  classDef viewer fill:#ede9fe,stroke:#7c3aed,color:#111827,stroke-width:1px;
+  classDef feature fill:#f8fafc,stroke:#64748b,color:#111827,stroke-dasharray:4 3;
+  classDef semantic fill:#f1f5f9,stroke:#475569,color:#111827,stroke-width:1px;
+
+  class A source;
+  class B optional;
+  class C exec;
+  class D,E stream;
+  class F,H,K live;
+  class G,I,L offline;
+  class J topology;
+  class K,L viewer;
+  class M feature;
+  class N,O,P,Q,R semantic;
 ```
 
 ## What Is Current
